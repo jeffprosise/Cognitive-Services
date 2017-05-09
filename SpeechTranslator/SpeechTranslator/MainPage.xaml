@@ -1,0 +1,42 @@
+﻿<Page
+    x:Class="SpeechTranslator.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:SpeechTranslator"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid Background="#fff0f0ff">
+        <TextBlock x:Name="micText" HorizontalAlignment="Left" Margin="30,32,0,0" Text="Input" />
+        <ComboBox x:Name="micBox" HorizontalAlignment="Left" Margin="100,24,0,0" Width="400" DisplayMemberPath="Name"/>
+
+        <TextBlock x:Name="speakerText" HorizontalAlignment="Left" Margin="30,74,0,0" Text="Output" />
+        <ComboBox x:Name="speakerBox" HorizontalAlignment="Left" Margin="100,66,0,0" Width="400" DisplayMemberPath="Name"/>
+
+        <TextBlock x:Name="fromTextBlock" HorizontalAlignment="Left" Margin="30,118,0,0" Text="From" VerticalAlignment="Top" />
+        <ComboBox x:Name="fromComboBox" HorizontalAlignment="Left" Margin="100,110,0,0" Width="160"/>
+
+        <TextBlock x:Name="toTextBlock" HorizontalAlignment="Left" Margin="300,118,0,0" Text="To" />
+        <ComboBox x:Name="toComboBox" HorizontalAlignment="Left" Margin="340,110,0,0" Width="160" SelectionChanged="toComboBox_SelectionChanged"/>
+
+        <TextBlock x:Name="voiceTextBlock" HorizontalAlignment="Left" Margin="30,162,0,0" Text="Voice" />
+        <ComboBox x:Name="voiceComboBox" HorizontalAlignment="Left" Margin="100,154,0,0" Width="400"/>
+
+        <Button x:Name="StartButton" Content="Start" Width="120" Height="40" Margin="100,198,0,0" VerticalAlignment="Top" Click="StartButton_Click"/>
+        <Button x:Name="StopButton" Content="Stop" Width="120" IsEnabled="false" Height="40" Margin="240,198,0,0" VerticalAlignment="Top" Click="StopButton_Click"/>
+        <Button x:Name="ClearButton" Content="Clear" Width="120" IsEnabled="false" Height="40" Margin="380, 198,0,0" VerticalAlignment="Top" Click="ClearButton_Click" />
+        
+        <ListView x:Name="listView" BorderThickness="1" BorderBrush="LightGray" Background="White" HorizontalAlignment="Left" Margin="100,260,0,24" Width="400" ItemsSource="{x:Bind ViewModel.Results}">
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="local:Result">
+                    <StackPanel>
+                        <TextBlock TextWrapping="WrapWholeWords" Text="{x:Bind Recognition}" />
+                        <TextBlock TextWrapping="WrapWholeWords" Text="{x:Bind Translation}" FontWeight="Bold" />
+                        <TextBlock Text="{x:Bind Status}" Foreground="Red" />
+                    </StackPanel>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </Grid>
+</Page>
