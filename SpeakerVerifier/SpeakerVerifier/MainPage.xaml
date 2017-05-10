@@ -9,7 +9,7 @@
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-            <TextBlock Text="Click the Start button, and then say &quot;Houston, we have had a problem&quot;" Margin="16" FontSize="24" TextAlignment="Center" Width="300" TextWrapping="WrapWholeWords"/>
+            <TextBlock Text="Click the Start button, and then say &quot;Houston, we have had a problem&quot; to verify that you are Jeff Prosise" Margin="16" FontSize="24" TextAlignment="Center" Width="300" TextWrapping="WrapWholeWords"/>
             <Button x:Name="TheButton" Content="Start" Width="300" Height="150" FontSize="36" HorizontalAlignment="Center" Click="OnButtonClicked" />
         </StackPanel>
     </Grid>

@@ -22590,10 +22590,10 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "c:\\users\\jeff\\documents\\visual studio 2017\\Projects\\SpeakerVerifier\\SpeakerVerifier\\SpeakerVerifier.csproj",
+      "projectUniqueName": "C:\\Users\\Jeff\\Documents\\Visual Studio 2017\\Projects\\SpeakerVerifier\\SpeakerVerifier\\SpeakerVerifier.csproj",
       "projectName": "SpeakerVerifier",
-      "projectPath": "c:\\users\\jeff\\documents\\visual studio 2017\\Projects\\SpeakerVerifier\\SpeakerVerifier\\SpeakerVerifier.csproj",
-      "outputPath": "c:\\users\\jeff\\documents\\visual studio 2017\\Projects\\SpeakerVerifier\\SpeakerVerifier\\obj\\",
+      "projectPath": "C:\\Users\\Jeff\\Documents\\Visual Studio 2017\\Projects\\SpeakerVerifier\\SpeakerVerifier\\SpeakerVerifier.csproj",
+      "outputPath": "C:\\Users\\Jeff\\Documents\\Visual Studio 2017\\Projects\\SpeakerVerifier\\SpeakerVerifier\\obj\\",
       "projectStyle": "PackageReference",
       "originalTargetFrameworks": [
         "uap10.0.10586"

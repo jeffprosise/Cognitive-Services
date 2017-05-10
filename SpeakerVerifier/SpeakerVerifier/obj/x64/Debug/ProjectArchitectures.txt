@@ -1,1 +1,1 @@
-c:\users\jeff\documents\visual studio 2017\Projects\SpeakerVerifier\SpeakerVerifier\SpeakerVerifier.csproj;x64
+C:\Users\Jeff\Documents\Visual Studio 2017\Projects\SpeakerVerifier\SpeakerVerifier\SpeakerVerifier.csproj;x64
