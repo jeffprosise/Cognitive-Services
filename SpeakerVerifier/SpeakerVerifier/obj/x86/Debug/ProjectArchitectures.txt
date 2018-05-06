@@ -1,1 +1,0 @@
-c:\users\jeff\documents\visual studio 2017\Projects\SpeakerVerifier\SpeakerVerifier\SpeakerVerifier.csproj;x86
