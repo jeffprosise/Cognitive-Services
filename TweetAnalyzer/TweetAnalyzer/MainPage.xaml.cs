@@ -38,7 +38,7 @@ namespace TweetAnalyzer
         private const string _consumerSecret = "twitter_consumer_secret";
         private const string _accessToken = "twitter_access_token";
         private const string _accessTokenSecret = "twitter_access_token_secret";
-        private const string _uri = "https://westus.api.cognitive.microsoft.com/text/analytics/v2.0/sentiment";
+        private const string _uri = "sentiment_url";
 
         public MainPage()
         {

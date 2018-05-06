@@ -31,8 +31,8 @@ namespace NotHotDog
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        private const string _uri = "https://southcentralus.api.cognitive.microsoft.com/customvision/v1.1/Prediction/65224b4f-17ea-4467-86c8-8ddef052f9db/image";
-        private const string _key = "73afaeffbdad43b1b8bb05628a60f73c";
+        private const string _uri = "custom_vision_url";
+        private const string _key = "subscription_key";
 
         public MainPage()
         {

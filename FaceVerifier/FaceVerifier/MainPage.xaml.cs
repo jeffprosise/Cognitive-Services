@@ -25,6 +25,7 @@ namespace FaceVerifier
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        private const string _uri = "face_api_url";
         private string _key = "subscription_key";
 
         public MainPage()
@@ -34,7 +35,7 @@ namespace FaceVerifier
 
         private async void OnVerifyButtonClicked(object sender, RoutedEventArgs e)
         {
-            var client = new FaceServiceClient(_key);
+            var client = new FaceServiceClient(_key, _uri);
 
             // Get a face ID for the face in the reference image
             var faces = await client.DetectAsync("https://prosise.blob.core.windows.net/photos/JeffProsise.jpg");

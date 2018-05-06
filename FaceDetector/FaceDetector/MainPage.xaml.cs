@@ -34,8 +34,8 @@ namespace FaceDetector
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        private const string _uri = "https://westus.api.cognitive.microsoft.com/face/v1.0";
-        private const string _key = "e63a99e3b99342649ed052a12198e7a3";
+        private const string _uri = "face_api_url";
+        private const string _key = "subscription_key";
 
         public MainPage()
         {
@@ -43,7 +43,6 @@ namespace FaceDetector
 
             this.SizeChanged += (s, args) =>
             {
-                Debug.WriteLine($"Container: {Container.ActualWidth} x {Container.ActualHeight}; Image: {LoadedImage.ActualWidth} x {LoadedImage.ActualHeight}");
                 DeleteFaceRectangles();
             };
         }
