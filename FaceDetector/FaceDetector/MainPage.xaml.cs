@@ -34,8 +34,8 @@ namespace FaceDetector
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        private const string _uri = "face_api_url";
-        private const string _key = "subscription_key";
+        private const string _uri = "BASE_FACE_API_URL";
+        private const string _key = "SUBSCRIPTION_KEY";
 
         public MainPage()
         {
@@ -93,9 +93,12 @@ namespace FaceDetector
                         try
                         {
                             stream.Seek(0L);
-                            var faces = await client.DetectAsync(stream.AsStream(), true, false, attributes); 
-    
-                            foreach(var face in faces)
+                            var faces = await client.DetectAsync(stream.AsStream(), true, false, attributes);
+
+                            Progress.IsActive = false;
+                            Overlay.Visibility = Visibility.Collapsed;
+
+                            foreach (var face in faces)
                             {
                                 // Highlight the face with a Rectangle
                                 var rect = new Rectangle();
@@ -170,15 +173,21 @@ namespace FaceDetector
                         }
                         catch (FaceAPIException fex)
                         {
+                            Progress.IsActive = false;
+                            Overlay.Visibility = Visibility.Collapsed;
                             await new MessageDialog(fex.ErrorMessage).ShowAsync();
                         }
                         catch (Exception ex)
                         {
+                            Progress.IsActive = false;
+                            Overlay.Visibility = Visibility.Collapsed;
                             await new MessageDialog(ex.Message).ShowAsync();
                         }
                     }
                     catch (Exception ex)
                     {
+                        Progress.IsActive = false;
+                        Overlay.Visibility = Visibility.Collapsed;
                         await new MessageDialog(ex.Message).ShowAsync();
                     }
                     finally
