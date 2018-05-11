@@ -88,8 +88,8 @@ namespace NotHotDog
                         // Show the results
                         var json = await response.Content.ReadAsStringAsync();
                         dynamic result = JsonConvert.DeserializeObject(await response.Content.ReadAsStringAsync());
-                        dynamic prediction = ((IEnumerable<dynamic>)(result.Predictions)).Where(p => p.Tag == "HotDog").ToArray()[0];
-                        var probability = prediction.Probability;
+                        dynamic prediction = ((IEnumerable<dynamic>)(result.predictions)).Where(p => p.tagName == "HotDog").ToArray()[0];
+                        var probability = prediction.probability;
 
                         if (probability > 0.90)
                         {

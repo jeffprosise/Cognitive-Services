@@ -114,7 +114,7 @@ namespace TweetAnalyzer
                     if (result.documents.Count > 0)
                         await new MessageDialog("Sentiment: " + result.documents[0].score.ToString("F2")).ShowAsync();
                     else
-                        await new MessageDialog(result.errors[0].message, "Error").ShowAsync();
+                        await new MessageDialog(result.errors[0].message.ToString(), "Error").ShowAsync();
                 }
                 else
                 {
