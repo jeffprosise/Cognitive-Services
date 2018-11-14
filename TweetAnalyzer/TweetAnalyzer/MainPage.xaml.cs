@@ -48,7 +48,7 @@ namespace TweetAnalyzer
         private async void OnAnalyzeButtonClicked(object sender, RoutedEventArgs e)
         {
             Progress.IsActive = true;
-            Output.Text = String.Empty;
+            Output.Items.Clear();
 
             try
             {
@@ -56,12 +56,12 @@ namespace TweetAnalyzer
                 if (!hashtag.StartsWith("#"))
                     hashtag = "#" + hashtag;
 
-                // Get up to 40 tweets
+                // Get up to 99 tweets
                 Auth.SetUserCredentials(_consumerKey, _consumerSecret, _accessToken, _accessTokenSecret);
                 var parameters = new SearchTweetsParameters(hashtag);
                 //parameters.SearchType = SearchResultType.Recent;
                 parameters.SearchType = SearchResultType.Mixed;
-                parameters.MaximumNumberOfResults = 40;
+                parameters.MaximumNumberOfResults = 99;
                 IEnumerable<ITweet> tweets = null;
 
                 await Task.Run(() =>
@@ -76,27 +76,32 @@ namespace TweetAnalyzer
                     return;
                 }
 
-                // Extract the text from each tweet
-                var builder = new StringBuilder();
+                // Build an array of documents containing tweets
+                int i = 0;
+                dynamic container = new JObject();
+                container.documents = new JArray();
 
                 foreach (var tweet in tweets)
                 {
-                    // Remove URLs from tweets
-                    builder.Append(Regex.Replace(tweet.Text, @"http[^\s]+", "") + "\n");
+                    if (tweet.Text.Length < 5)
+                        continue;
+                    
+                    // Remove URLs from tweets and escape quotation marks
+                    var text = Regex.Replace(tweet.Text, @"http[^\s]+", "").Replace("\"", "\\\"").Replace("\n", " ");
+
+                    // Add a document containing the tweet to the array
+                    dynamic document = new JObject();
+                    document.id = ++i;
+                    document.text = text;
+                    container.documents.Add(document);
+
+                    // Add the tweet to the ListBox
+                    Output.Items.Add(text);
                 }
 
-                var text = builder.ToString();
-                Output.Text = text;
-
-                // Formulate JSON input
-                dynamic document = new JObject();
-                document.id = "1000";
-                document.text = text.Replace("\"", "\\\""); // Escape quotation marks in tweets;
-                dynamic container = new JObject();
-                container.documents = new JArray(document);
                 var json = container.ToString();
 
-                // Call Cognitive Services
+                // Call the Text Analytics API
                 var client = new HttpClient();
                 client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", _key);
                 var content = new HttpStringContent(json);
@@ -105,14 +110,26 @@ namespace TweetAnalyzer
                 var response = await client.PostAsync(new Uri(_uri), content);
                 Progress.IsActive = false;
 
-                // Show the results
                 if (response.IsSuccessStatusCode)
                 {
                     json = await response.Content.ReadAsStringAsync();
                     var result = JObject.Parse(json);
 
                     if (result.documents.Count > 0)
-                        await new MessageDialog("Sentiment: " + result.documents[0].score.ToString("F2")).ShowAsync();
+                    {
+                        // Compute the average sentiment score for all tweets
+                        var score = 0.0;
+                        int count = 0;
+
+                        foreach(var document in result.documents)
+                        {
+                            score += document.score.Value;
+                            count++;
+                        }
+
+                        // Show the result
+                        await new MessageDialog($"Sentiment: {score/count:F2}").ShowAsync();
+                    }
                     else
                         await new MessageDialog(result.errors[0].message.ToString(), "Error").ShowAsync();
                 }

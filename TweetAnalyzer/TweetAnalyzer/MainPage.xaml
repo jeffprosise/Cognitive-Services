@@ -18,9 +18,7 @@
                 <Button Width="120" Height="40" HorizontalAlignment="Center" FontSize="20" Content="Analyze" Click="OnAnalyzeButtonClicked" />
             </StackPanel>
         </Border>
-        <ScrollViewer Grid.Row="1" Margin="16">
-            <TextBlock x:Name="Output" TextWrapping="WrapWholeWords" />
-        </ScrollViewer>
+        <ListBox x:Name="Output" Grid.Row="1" Margin="8" Background="White" />
         <ProgressRing x:Name="Progress" Width="200" Height="200" IsActive="false" Grid.Row="0" Grid.RowSpan="2" />
     </Grid>
 </Page>
