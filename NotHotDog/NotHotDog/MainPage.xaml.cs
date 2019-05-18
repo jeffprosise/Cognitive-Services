@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Azure.CognitiveServices.Vision.CustomVision.Prediction;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -31,8 +32,10 @@ namespace NotHotDog
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        private const string _uri = "custom_vision_url";
-        private const string _key = "subscription_key";
+        private const string _uri = "PREDICTION_ENDPOINT";
+        private const string _key = "PREDICTION_KEY";
+        private const string _name = "ITERATION_NAME";
+        private Guid _id = Guid.Parse("PROJECT_ID");
 
         public MainPage()
         {
@@ -52,44 +55,33 @@ namespace NotHotDog
 
             if (file != null)
             {
-                byte[] buffer;
-
                 using (IRandomAccessStream stream = await file.OpenAsync(FileAccessMode.Read))
                 {
                     // Show the image
                     var image = new BitmapImage();
                     await image.SetSourceAsync(stream);
                     LoadedImage.Source = image;
-
-                    // Read the image into a byte array
                     stream.Seek(0L);
-                    var bytes = new byte[stream.Size];
-                    await stream.ReadAsync(bytes.AsBuffer(), (uint)stream.Size, InputStreamOptions.None);
-                    buffer = bytes;
-                }
 
-                try
-                {
-                    Progress.IsActive = true;
-                    Overlay.Visibility = Visibility.Visible;
-
-                    // Submit the image to the Custom Vision Service
-                    var client = new HttpClient();
-                    client.DefaultRequestHeaders.Add("Prediction-Key", _key);
-                    var content = new ByteArrayContent(buffer);
-
-                    var response = await client.PostAsync(_uri, content);
-
-                    Progress.IsActive = false;
-                    Overlay.Visibility = Visibility.Collapsed;
-
-                    if (response.IsSuccessStatusCode)
+                    try
                     {
-                        // Show the results
-                        var json = await response.Content.ReadAsStringAsync();
-                        dynamic result = JsonConvert.DeserializeObject(await response.Content.ReadAsStringAsync());
-                        dynamic prediction = ((IEnumerable<dynamic>)(result.predictions)).Where(p => p.tagName == "HotDog").ToArray()[0];
-                        var probability = prediction.probability;
+                        Progress.IsActive = true;
+                        Overlay.Visibility = Visibility.Visible;
+
+                        // Submit the image to the Custom Vision Service
+                        CustomVisionPredictionClient client = new CustomVisionPredictionClient()
+                        {
+                            ApiKey = _key,
+                            Endpoint = _uri
+                        };
+
+                        var result = await client.ClassifyImageAsync(_id, _name, stream.AsStream());
+
+                        Progress.IsActive = false;
+                        Overlay.Visibility = Visibility.Collapsed;
+
+                        // Show the result
+                        var probability = result.Predictions.FirstOrDefault(x => x.TagName.ToLowerInvariant() == "hotdog").Probability;
 
                         if (probability > 0.90)
                         {
@@ -100,19 +92,18 @@ namespace NotHotDog
                             await new MessageDialog("Not a hot dog").ShowAsync();
                         }
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        await new MessageDialog($"Call failed ({response.StatusCode})").ShowAsync();
+                        Progress.IsActive = false;
+                        Overlay.Visibility = Visibility.Collapsed;
+
+                        await new MessageDialog(ex.Message).ShowAsync();
                     }
-                }
-                catch (Exception ex)
-                {
-                    await new MessageDialog(ex.Message).ShowAsync();
-                }
-                finally
-                {
-                    Progress.IsActive = false;
-                    Overlay.Visibility = Visibility.Collapsed;
+                    finally
+                    {
+                        Progress.IsActive = false;
+                        Overlay.Visibility = Visibility.Collapsed;
+                    }
                 }
             }
         }
