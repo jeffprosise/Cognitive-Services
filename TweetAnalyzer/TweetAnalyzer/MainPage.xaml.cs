@@ -83,9 +83,6 @@ namespace TweetAnalyzer
 
                 foreach (var tweet in tweets)
                 {
-                    if (tweet.Text.Length < 5)
-                        continue;
-                    
                     // Remove URLs from tweets and escape quotation marks
                     var text = Regex.Replace(tweet.Text, @"http[^\s]+", "").Replace("\"", "\\\"").Replace("\n", " ");
 

@@ -131,7 +131,7 @@
       <Version>5.2.3</Version>
     </PackageReference>
     <PackageReference Include="TweetinviAPI">
-      <Version>1.2.0.1</Version>
+      <Version>4.0.2</Version>
     </PackageReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
