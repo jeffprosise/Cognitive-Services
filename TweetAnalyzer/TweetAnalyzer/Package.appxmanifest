@@ -7,11 +7,11 @@
   IgnorableNamespaces="uap mp">
 
   <Identity
-    Name="a8d87596-229d-42df-b3bf-280ab78becb8"
+    Name="a14c307e-1144-45f2-957f-e8734c322e58"
     Publisher="CN=Jeff"
     Version="1.0.0.0" />
 
-  <mp:PhoneIdentity PhoneProductId="a8d87596-229d-42df-b3bf-280ab78becb8" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="a14c307e-1144-45f2-957f-e8734c322e58" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>TweetAnalyzer</DisplayName>
