@@ -37,6 +37,7 @@ namespace TweetAnalyzer
         private async void OnAnalyzeButtonClicked(object sender, RoutedEventArgs e)
         {
             Progress.IsActive = true;
+            Overlay.Visibility = Visibility.Visible;
             Output.Items.Clear();
 
             try
@@ -87,16 +88,24 @@ namespace TweetAnalyzer
 
                 client.Endpoint = _uri;
                 var results = await client.SentimentBatchAsync(batch);
+
                 Progress.IsActive = false;
+                Overlay.Visibility = Visibility.Collapsed;
 
                 // Show the average sentiment score for all tweets
                 var score = results.Documents.Select(x => x.Score).Average();
                 await new MessageDialog($"Sentiment: {score:F2}").ShowAsync();
             }
+            catch (Exception ex)
+            {
+                Progress.IsActive = false;
+                Overlay.Visibility = Visibility.Collapsed;
+                await new MessageDialog(ex.Message).ShowAsync();
+            }
             finally
             {
-                // Make sure the progress ring gets turned off
                 Progress.IsActive = false;
+                Overlay.Visibility = Visibility.Collapsed;
             }
         }
     }
