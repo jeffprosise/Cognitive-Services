@@ -1,15 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using System.Web;
-using System.Web.Mvc;
-using ImageResizer;
-using System.IO;
-using Intellipix.Models;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Blob;
-using System.Configuration;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Intellipix.Models;
+
+using System.Drawing;
+using System.IO;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Hosting;
+
+using Microsoft.Azure.Storage.Blob;
+using Microsoft.Azure.Storage;
+using Microsoft.Extensions.Configuration;
+
 using Microsoft.Azure.CognitiveServices.Vision.ComputerVision;
 using Microsoft.Azure.CognitiveServices.Vision.ComputerVision.Models;
 
@@ -17,10 +22,17 @@ namespace Intellipix.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly IConfiguration _configuration;
+
+        public HomeController(IConfiguration configuration)
+        {
+            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+        }
+
         public ActionResult Index(string id)
         {
             // Pass a list of blob URIs and captions in ViewBag
-            CloudStorageAccount account = CloudStorageAccount.Parse(ConfigurationManager.AppSettings["StorageConnectionString"]);
+            CloudStorageAccount account = CloudStorageAccount.Parse(_configuration.GetConnectionString("Storage"));
             CloudBlobClient client = account.CreateCloudBlobClient();
             CloudBlobContainer container = client.GetContainerReference("photos");
             List<BlobInfo> blobs = new List<BlobInfo>();
@@ -51,24 +63,53 @@ namespace Intellipix.Controllers
             ViewBag.Search = id; // Prevent search box from losing its content
             return View();
         }
-        public ActionResult About()
+
+        private bool HasMatchingMetadata(CloudBlockBlob blob, string term)
         {
-            ViewBag.Message = "Your application description page.";
+            foreach (var item in blob.Metadata)
+            {
+                if (item.Key.StartsWith("Tag") && item.Value.Equals(term, StringComparison.InvariantCultureIgnoreCase))
+                    return true;
+            }
 
-            return View();
-        }
-
-        public ActionResult Contact()
-        {
-            ViewBag.Message = "Your contact page.";
-
-            return View();
+            return false;
         }
 
         [HttpPost]
-        public async Task<ActionResult> Upload(HttpPostedFileBase file)
+        public ActionResult Search(string term)
         {
-            if (file != null && file.ContentLength > 0)
+            return RedirectToAction("Index", new { id = term });
+        }
+
+        public IActionResult About()
+        {
+            ViewData["Message"] = "Your application description page.";
+
+            return View();
+        }
+
+        public IActionResult Contact()
+        {
+            ViewData["Message"] = "Your contact page.";
+
+            return View();
+        }
+
+        public IActionResult Privacy()
+        {
+            return View();
+        }
+
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> Upload(IFormFile file)
+        {
+            if (file?.Length > 0)
             {
                 // Make sure the user selected an image file
                 if (!file.ContentType.StartsWith("image"))
@@ -80,31 +121,36 @@ namespace Intellipix.Controllers
                     try
                     {
                         // Save the original image in the "photos" container
-                        CloudStorageAccount account = CloudStorageAccount.Parse(ConfigurationManager.AppSettings["StorageConnectionString"]);
+                        CloudStorageAccount account = CloudStorageAccount.Parse(_configuration.GetConnectionString("Storage"));
                         CloudBlobClient client = account.CreateCloudBlobClient();
                         CloudBlobContainer container = client.GetContainerReference("photos");
                         CloudBlockBlob photo = container.GetBlockBlobReference(Path.GetFileName(file.FileName));
-                        await photo.UploadFromStreamAsync(file.InputStream);
+                        await photo.UploadFromStreamAsync(file.OpenReadStream());
 
                         // Generate a thumbnail and save it in the "thumbnails" container
-                        using (var outputStream = new MemoryStream())
+                        using (var formFileStream = file.OpenReadStream())
+                        using (var sourceImage = Image.FromStream(formFileStream))
                         {
-                            file.InputStream.Seek(0L, SeekOrigin.Begin);
-                            var settings = new ResizeSettings { MaxWidth = 192 };
-                            ImageBuilder.Current.Build(file.InputStream, outputStream, settings);
-                            outputStream.Seek(0L, SeekOrigin.Begin);
-                            container = client.GetContainerReference("thumbnails");
-                            CloudBlockBlob thumbnail = container.GetBlockBlobReference(Path.GetFileName(file.FileName));
-                            await thumbnail.UploadFromStreamAsync(outputStream);
+                            var newWidth = 192;
+                            var newHeight = (Int32)(1.0 * sourceImage.Height / sourceImage.Width * newWidth);
+                            using (var destinationImage = new Bitmap(sourceImage, new Size(newWidth, newHeight)))
+                            using (var stream = new MemoryStream())
+                            {
+                                destinationImage.Save(stream, sourceImage.RawFormat);
+                                stream.Seek(0L, SeekOrigin.Begin);
+                                container = client.GetContainerReference("thumbnails");
+                                CloudBlockBlob thumbnail = container.GetBlockBlobReference(Path.GetFileName(file.FileName));
+                                await thumbnail.UploadFromStreamAsync(stream);
+                            }
                         }
 
                         // Submit the image to Azure's Computer Vision API
                         ComputerVisionClient vision = new ComputerVisionClient(
-                            new ApiKeyServiceClientCredentials(ConfigurationManager.AppSettings["SubscriptionKey"]),
+                            new ApiKeyServiceClientCredentials(_configuration.GetSection("Vision").GetValue<String>("Key")),
                             new System.Net.Http.DelegatingHandler[] { }
                         );
 
-                        vision.Endpoint = ConfigurationManager.AppSettings["VisionEndpoint"];
+                        vision.Endpoint = _configuration.GetSection("Vision").GetValue<String>("Endpoint");
 
                         VisualFeatureTypes[] features = new VisualFeatureTypes[] { VisualFeatureTypes.Description };
                         ImageAnalysis result = await vision.AnalyzeImageAsync(photo.Uri.ToString(), features);
@@ -129,23 +175,6 @@ namespace Intellipix.Controllers
             }
 
             return RedirectToAction("Index");
-        }
-
-        [HttpPost]
-        public ActionResult Search(string term)
-        {
-            return RedirectToAction("Index", new { id = term });
-        }
-
-        private bool HasMatchingMetadata(CloudBlockBlob blob, string term)
-        {
-            foreach (var item in blob.Metadata)
-            {
-                if (item.Key.StartsWith("Tag") && item.Value.Equals(term, StringComparison.InvariantCultureIgnoreCase))
-                    return true;
-            }
-
-            return false;
         }
     }
 }

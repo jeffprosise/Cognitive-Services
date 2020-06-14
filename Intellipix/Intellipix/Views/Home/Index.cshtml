@@ -1,5 +1,5 @@
 ﻿@{
-    ViewBag.Title = "Intellipix Home Page";
+    ViewData["Title"] = "Home Page";
 }
 
 @using Intellipix.Models
@@ -44,10 +44,10 @@
 </div>
 
 @section scripts
- {
+	{
     <script type="text/javascript" language="javascript">
-         if ("@TempData["Message"]" !== "") {
-             alert("@TempData["Message"]");
-         }
+	        if ("@TempData["Message"]" !== "") {
+	            alert("@TempData["Message"]");
+	        }
     </script>
 }
