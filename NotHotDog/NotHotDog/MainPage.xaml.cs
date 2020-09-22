@@ -1,4 +1,5 @@
 ﻿using Microsoft.Azure.CognitiveServices.Vision.CustomVision.Prediction;
+using Microsoft.Azure.CognitiveServices.Vision.CustomVision.Prediction.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -69,27 +70,35 @@ namespace NotHotDog
                         Overlay.Visibility = Visibility.Visible;
 
                         // Submit the image to the Custom Vision Service
-                        CustomVisionPredictionClient client = new CustomVisionPredictionClient()
-                        {
-                            ApiKey = _key,
-                            Endpoint = _uri
-                        };
+                        CustomVisionPredictionClient client = new CustomVisionPredictionClient(
+                            new ApiKeyServiceClientCredentials(_key),
+                            new System.Net.Http.DelegatingHandler[] { }
+                        );
+
+                        client.Endpoint = _uri;
 
                         var result = await client.ClassifyImageAsync(_id, _name, stream.AsStream());
+                        var prediction = result.Predictions.FirstOrDefault(x => x.TagName.ToLowerInvariant() == "hotdog");
 
                         Progress.IsActive = false;
                         Overlay.Visibility = Visibility.Collapsed;
 
-                        // Show the result
-                        var probability = result.Predictions.FirstOrDefault(x => x.TagName.ToLowerInvariant() == "hotdog").Probability;
-
-                        if (probability > 0.90)
+                        // Show the results
+                        if (prediction != null)
                         {
-                            await new MessageDialog("It's a hot dog!").ShowAsync();
+                            // If the results include a "hotdog" label, show the probability that it's a hot dog
+                            await new MessageDialog($"Probability that it's a hot dog: {prediction.Probability:P1}").ShowAsync();
                         }
                         else
                         {
-                            await new MessageDialog("Not a hot dog").ShowAsync();
+                            // If the results don't include a "hotdog" label, show all tags and probabilities
+                            var builder = new StringBuilder();
+                            foreach (var pred in result.Predictions)
+                            {
+                                builder.Append($"{pred.TagName}: {pred.Probability:P1}\n");
+                            }
+
+                            await new MessageDialog(builder.ToString()).ShowAsync();
                         }
                     }
                     catch (Exception ex)
