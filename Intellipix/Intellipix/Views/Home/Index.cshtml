@@ -18,12 +18,12 @@
             @using (Html.BeginForm("Search", "Home", FormMethod.Post, new { enctype = "multipart/form-data", @class = "navbar-form" }))
             {
                 <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Search photos" name="term" value="@ViewBag.Search" style="max-width: 800px">
-                    <span class="input-group-btn">
+                    <input type="text" class="form-control" placeholder="Search photos" name="term" value="@Context.Request.Query["term"]" style="max-width: 800px">
+                    <div class="input-group-append">
                         <button class="btn btn-primary" type="submit">
-                            <i class="glyphicon glyphicon-search"></i>
+                            <i class="fa fa-search"></i>
                         </button>
-                    </span>
+                    </div>
                 </div>
             }
         </div>
@@ -33,7 +33,7 @@
 
     <div class="row">
         <div class="col-sm-12">
-            @foreach (BlobInfo blob in ViewBag.Blobs)
+            @foreach (BlobData blob in ViewBag.Blobs)
             {
                 <a href="@blob.ImageUri" rel="lightbox" title="@blob.Caption">
                     <img src="@blob.ThumbnailUri" width="192" title="@blob.Caption" style="padding-right: 16px; padding-bottom: 16px" />
@@ -44,10 +44,10 @@
 </div>
 
 @section scripts
-	{
-    <script type="text/javascript" language="javascript">
-	        if ("@TempData["Message"]" !== "") {
-	            alert("@TempData["Message"]");
-	        }
+{
+    <script type="text/javascript">
+        if ("@TempData["Message"]" !== "") {
+            alert("@TempData["Message"]");
+        }
     </script>
 }

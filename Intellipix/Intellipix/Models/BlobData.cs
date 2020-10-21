@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Intellipix.Models
 {
-    public class BlobInfo
+    public class BlobData
     {
         public string ImageUri { get; set; }
         public string ThumbnailUri { get; set; }

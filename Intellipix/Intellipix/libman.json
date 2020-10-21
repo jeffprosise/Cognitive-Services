@@ -3,7 +3,7 @@
   "defaultProvider": "cdnjs",
   "libraries": [
     {
-      "library": "lightbox2@2.11.1",
+      "library": "lightbox2@2.11.3",
       "destination": "wwwroot/lib/lightbox2/"
     }
   ]
